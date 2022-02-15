@@ -22,7 +22,6 @@ public class FileManager
 		}
 		userFile = homePath + "user.mlf";
 		dataFile = homePath + "data.mlf";
-		System.out.println(userFile);
 	}
 	
 	public String GetUserFile()
