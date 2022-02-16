@@ -9,15 +9,41 @@ public class DataHolder
 	
 	public void SetAccountsList(String[] accounts)
 	{
-		for(int i = 0; i < accounts.length; i++)
+		if(accounts != null)
 		{
-			accountsList.add(accounts[i]);
+			for(int i = 0; i < accounts.length; i++)
+			{
+				accountsList.add(accounts[i]);
+			}
 		}
 	}
 	
 	public ArrayList<String> GetAccountsList()
 	{
 		return accountsList;
+	}
+	
+	public String GetAccountDataFromName(String account)
+	{
+		for(int i = 0; i < accountsList.size(); i++)
+		{
+			if(accountsList.get(i).split(";")[1].equals(account))
+			{
+				return accountsList.get(i);
+			}
+		}
+		return null;
+	}
+	
+	public void EditAccount(String oldName, String newValue)
+	{
+		for(int i = 0; i < accountsList.size(); i++)
+		{
+			if(accountsList.get(i).split(";")[1].equals(oldName))
+			{
+				accountsList.set(i, newValue);
+			}
+		}
 	}
 	
 	public void InsertNewAccount(String account)
@@ -75,15 +101,30 @@ public class DataHolder
 	
 	public void SetTransactionsList(String[] transactions)
 	{
-		for(int i = 0; i < transactions.length; i++)
+		if(transactions != null)
 		{
-			transactionsList.add(transactions[i]);
+			for(int i = 0; i < transactions.length; i++)
+			{
+				transactionsList.add(transactions[i]);
+			}
 		}
 	}
 	
 	public ArrayList<String> GetTransactionsList()
 	{
 		return transactionsList;
+	}
+	
+	public void EditTransaction(String oldValue, String newValue)
+	{
+		for(int i = 0; i < transactionsList.size(); i++)
+		{
+			if(transactionsList.get(i).equals(oldValue))
+			{
+				transactionsList.set(i, oldValue.split(";")[0] + ";" + newValue);
+				return;
+			}
+		}
 	}
 	
 	public void DeleteAllTransactionFromID(int id)
@@ -93,6 +134,18 @@ public class DataHolder
 			if(id == Integer.valueOf(transactionsList.get(i).split(";")[0]))
 			{
 				transactionsList.remove(i);
+			}
+		}
+	}
+	
+	public void DeleteTransactionFromIdentifier(String identifier)
+	{
+		for(int i = 0; i < transactionsList.size(); i++)
+		{
+			if(transactionsList.get(i).equals(identifier))
+			{
+				transactionsList.remove(i);
+				return;
 			}
 		}
 	}
@@ -119,6 +172,13 @@ public class DataHolder
 			}
 		}
 		return selectedTransactions;
+	}
+	
+	public void AddTransaction(String account, String transaction)
+	{
+		int id = GetAccountIDFromName(account);
+		transaction = id + ";" + transaction;
+		transactionsList.add(transaction);
 	}
 	
 	public float GetAccountTarget(String account)

@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.security.PublicKey;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -74,9 +76,9 @@ public class Swing_View
 	
 	private Object[] tableColumnNames = 
 	{
-		"Wert",
+		"Datum",
 		"Bezeichnung",
-		"Datum"
+		"Wert"
 	};
 	
 	public Swing_View() 
@@ -118,6 +120,7 @@ public class Swing_View
 		layout = new SpringLayout(); 
 		//Accounts List
 		accountList = new JList<String>();
+		accountList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		accountList.setBorder(new LineBorder(Color.black));
 		layout.putConstraint(SpringLayout.WEST, accountList, 5, SpringLayout.WEST, frame);
 		layout.putConstraint(SpringLayout.EAST, accountList, 300, SpringLayout.EAST, frame);
@@ -125,18 +128,19 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.SOUTH, accountList, 500, SpringLayout.SOUTH, frame);
 		//Transaction Table
 		transactionTable = new JTable();
+		transactionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		transactionTable.setBorder(new LineBorder(Color.black));
 		layout.putConstraint(SpringLayout.WEST, transactionTable, 305, SpringLayout.WEST, frame);
 		layout.putConstraint(SpringLayout.EAST, transactionTable, 700, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, transactionTable, 30, SpringLayout.NORTH, frame);
 		layout.putConstraint(SpringLayout.SOUTH, transactionTable, 500, SpringLayout.SOUTH, frame);
-		//Account Calc Box
-		targetCalculateBox = new JPanel();
+		//Account Calc Box TODO Implementieren und Freigeben
+		/*targetCalculateBox = new JPanel();
 		targetCalculateBox.setBorder(new LineBorder(Color.black));
 		layout.putConstraint(SpringLayout.WEST, targetCalculateBox, 705, SpringLayout.WEST, frame);
 		layout.putConstraint(SpringLayout.EAST, targetCalculateBox, 995, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, targetCalculateBox, 250, SpringLayout.NORTH, frame);
-		layout.putConstraint(SpringLayout.SOUTH, targetCalculateBox, 450, SpringLayout.SOUTH, frame);
+		layout.putConstraint(SpringLayout.SOUTH, targetCalculateBox, 450, SpringLayout.SOUTH, frame);*/
 		//Add Transaction Button
 		addTransactionButton = new JButton("Geld Buchen");
 		layout.putConstraint(SpringLayout.WEST, addTransactionButton, 705, SpringLayout.WEST, frame);
@@ -164,7 +168,7 @@ public class Swing_View
 		accountMenu.add(editAccountItem);
 		accountMenu.add(deleteAccountItem);
 		accountMenu.add(new JSeparator());
-		accountMenu.add(importAccountListItem);
+		//accountMenu.add(importAccountListItem); Freigeben wenn Fertig
 		editAccountItem.setEnabled(false);
 		deleteAccountItem.setEnabled(false);
 		//Transaction Menu
@@ -179,11 +183,10 @@ public class Swing_View
 		menuBar.add(accountMenu);
 		menuBar.add(transactionMenu);
 		
-		
 		frame.setLayout(layout);
 		frame.add(accountList);
 		frame.add(transactionTable);
-		frame.add(targetCalculateBox);
+		//frame.add(targetCalculateBox);
 		frame.add(addTransactionButton);
 		frame.add(totalBalanceLabel);
 		frame.add(menuBar);
@@ -194,19 +197,7 @@ public class Swing_View
 		{
 			public void mouseClicked(MouseEvent event)
 			{
-				ArrayList<String> transactions = dh.GetTransactionsForAccount(accountList.getSelectedValue().toString());
-				UpdateTransactionTable(transactions);
-				float target = dh.GetAccountTarget(accountList.getSelectedValue().toString());
-				float balance = calc.CalculateTotalBalance(transactions);
-				if(target == -1)
-				{
-					totalBalanceLabel.setText("<html><body>" + balance + "€<br><br>Kein Ziel Gesetzt</body></html>");
-				}
-				else 
-				{
-					float difference = target - balance;
-					totalBalanceLabel.setText("<html><body>" + balance + "€ /<br>" + target + "€<br><br>noch " + difference + "€ bis zum Ziel</body></html>");
-				}
+				UpdateBalanceText();
 				if(accountList.getSelectedIndex() != -1)
 				{
 					editAccountItem.setEnabled(true);
@@ -219,10 +210,15 @@ public class Swing_View
 		{
 			public void mouseClicked(MouseEvent event)
 			{
-				if(transactionTable.getSelectedRow() != -1)
+				if(transactionTable.getSelectedRow() > 0)
 				{
 					editTransactionItem.setEnabled(true);
 					deleteTransactionItem.setEnabled(true);
+				}
+				else 
+				{
+					editTransactionItem.setEnabled(false);
+					deleteTransactionItem.setEnabled(false);
 				}
 			}
 		});
@@ -231,13 +227,36 @@ public class Swing_View
 		{
 			public void actionPerformed(ActionEvent e) 
 			{
-				String dataString = OpenAccountDialog();
+				AccountDialog ad = new AccountDialog();
+				String dataString = ad.OpenAccountDialog();
 				if(dataString == null)
 				{
 					return;
 				}
 				dh.InsertNewAccount(dataString);
 				UpdateAccountsList();				
+				fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
+			}
+		});
+		
+		editAccountItem.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				AccountDialog ad = new AccountDialog();
+				String accountData = dh.GetAccountDataFromName(accountList.getSelectedValue().toString());
+				ad.SetAccountNameField(accountData.split(";")[1]);
+				if(!accountData.split(";")[2].equals("none"))
+				{
+					ad.SetAccountTargetField(accountData.split(";")[2]);
+				}
+				if(!accountData.split(";")[3].equals("none"))
+				{
+					ad.SetAccountTargetDate(accountData.split(";")[3]);
+				}
+				accountData = accountData.split(";")[0] + ";" + ad.OpenAccountDialog();
+				dh.EditAccount(accountList.getSelectedValue().toString(), accountData);
+				UpdateAccountsList();
 				fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
 			}
 		});
@@ -257,57 +276,60 @@ public class Swing_View
 			}
 		});
 		
-		UpdateAccountsList();
-	}
-	
-	private String OpenAccountDialog()
-	{
-		JTextField accountNameField = new JTextField();
-		JTextField accountTargetField = new JTextField();
-		UtilDateModel model = new UtilDateModel();
-		Properties p = new Properties();
-		p.put("text.today", "Today");
-		p.put("text.month", "Month");
-		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
-		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateComponentFormatter());
-		final JComponent[] inputComponents = new JComponent[]
+		addTransactionButton.addMouseListener(new MouseAdapter() 
 		{
-			new JLabel("Kontoname"),
-			accountNameField,
-			new JLabel("Sparziel"),
-			accountTargetField,
-			new JLabel("Datum Sparziel"),
-			datePicker
-		};
+			public void mouseClicked(MouseEvent e) 
+			{
+				TransactionDialog td = new TransactionDialog();
+				String transactionData = td.OpenTransactionDialog();
+				if(transactionData == null)
+				{
+					return;
+				}
+				dh.AddTransaction(accountList.getSelectedValue().toString(), transactionData);
+				UpdateTransactionTable(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
+				UpdateBalanceText();
+				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
+			}
+		});
 		
-		int result = JOptionPane.showConfirmDialog(null, inputComponents, "Konto Manager", JOptionPane.OK_CANCEL_OPTION);
-		if(result == JOptionPane.OK_OPTION)
+		editTransactionItem.addActionListener(new ActionListener() 
 		{
-			String name = accountNameField.getText();
-			if(name.length() <= 0)
+			public void actionPerformed(ActionEvent e) 
 			{
-				JOptionPane.showConfirmDialog(null, null, "Kein Kontoname eingefügt", JOptionPane.ERROR_MESSAGE);
-				return null;
+				TransactionDialog td = new TransactionDialog();
+				String transactionData = dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()).get(transactionTable.getSelectedRow() - 1);
+				td.SetTransactionDate(transactionData.split(";")[1]);
+				td.SetDescriptionField(transactionData.split(";")[2]);
+				td.SetMoneyField(transactionData.split(";")[3]);
+				String oldTransactionData = transactionData;
+				transactionData = td.OpenTransactionDialog();
+				if(transactionData == null)
+				{
+					return;
+				}
+				System.out.println(transactionData);
+				dh.EditTransaction(oldTransactionData, transactionData);
+				UpdateTransactionTable(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
+				UpdateBalanceText();
+				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
 			}
-			String target = accountTargetField.getText();
-			String date = "";
-			if(target.length() <= 0)
+		});
+		
+		deleteTransactionItem.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
 			{
-				target = "none";
+				int tableID = transactionTable.getSelectedRow();
+				//TODO Warnungs Message ausgeben.
+				dh.DeleteTransactionFromIdentifier(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()).get(tableID - 1));
+				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
+				UpdateTransactionTable(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
+				UpdateBalanceText();
 			}
-			if(datePicker.getModel().getValue() == null)
-			{
-				date = "none";
-			}
-			else 
-			{
-				date = datePicker.getModel().getValue().toString();
-			}
-			String accountData = accountNameField.getText() + ";" + target + ";" + date;
-			return accountData;
-		}
-		return null;
+		});
+		
+		UpdateAccountsList();
 	}
 	
 	private void UpdateTransactionTable(ArrayList<String> transactions) 
@@ -326,6 +348,23 @@ public class Swing_View
 			tableModel.addRow(currentTransaction.split(";"));
 		}
 		transactionTable.setModel(tableModel);
+	}
+	
+	private void UpdateBalanceText()
+	{
+		ArrayList<String> transactions = dh.GetTransactionsForAccount(accountList.getSelectedValue().toString());
+		UpdateTransactionTable(transactions);
+		float target = dh.GetAccountTarget(accountList.getSelectedValue().toString());
+		float balance = calc.CalculateTotalBalance(transactions);
+		if(target == -1)
+		{
+			totalBalanceLabel.setText("<html><body>" + balance + "€<br><br>Kein Ziel Gesetzt</body></html>");
+		}
+		else 
+		{
+			float difference = target - balance;
+			totalBalanceLabel.setText("<html><body>" + balance + "€ /<br>" + target + "€<br><br>noch " + difference + "€ bis zum Ziel</body></html>");
+		}
 	}
 	
 	private void UpdateAccountsList()
