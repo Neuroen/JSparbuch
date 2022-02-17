@@ -2,7 +2,7 @@
 
 Ein kleines Sparbuchprogramm, mit dem der Nutzer immer im Blick hat, wie es um seine Sparziele steht.
 
-![Die Anwendung]()
+![Die Anwendung](./assets/Screenshot.PNG)
 
 ### Funktionen
 
