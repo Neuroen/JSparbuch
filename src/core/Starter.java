@@ -6,8 +6,16 @@ public class Starter
 	{
 		if(args.length == 0)
 		{
-			Swing_View sw = new Swing_View();
-			sw.StartGui();
+			if(!System.getProperty("os.name").contains("Windows"))
+			{
+				Swing_View sw = new Swing_View();
+				sw.StartGui();
+			}
+			else 
+			{
+				Windows_View wv = new Windows_View();
+				wv.StartGui();
+			}
 		}
 		else 
 		{

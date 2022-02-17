@@ -1,53 +1,31 @@
 package core;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.security.PublicKey;
-import java.security.KeyStore.PrivateKeyEntry;
 import java.util.ArrayList;
-import java.util.Properties;
 
-import javax.swing.JFrame;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
-import org.jdatepicker.impl.DateComponentFormatter;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-import org.jdatepicker.*;
-
-public class Swing_View 
+public class Windows_View 
 {
 	private FileManager fm;
 	private DataHolder dh;
@@ -81,7 +59,7 @@ public class Swing_View
 		"Wert"
 	};
 	
-	public Swing_View() 
+	public Windows_View() 
 	{
 		fm = new FileManager();
 		dh = new DataHolder();
@@ -99,7 +77,7 @@ public class Swing_View
 			{
 				try 
 				{
-					Swing_View window = new Swing_View();
+					Windows_View window = new Windows_View();
 					window.frame.setVisible(true);
 				} 
 				catch (Exception e) 
@@ -118,25 +96,23 @@ public class Swing_View
 		frame.setResizable(false);
 		
 		layout = new SpringLayout(); 
-		
 		//Accounts List
 		accountList = new JList<String>();
 		accountList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		accountList.setBorder(new LineBorder(Color.black));
-		layout.putConstraint(SpringLayout.WEST, accountList, 5, SpringLayout.WEST, frame);
-		layout.putConstraint(SpringLayout.EAST, accountList, 300, SpringLayout.EAST, frame);
+		accountList.setBorder(new LineBorder(Color.black));		
+		layout.putConstraint(SpringLayout.WEST, accountList, 10, SpringLayout.WEST, frame);
+		layout.putConstraint(SpringLayout.EAST, accountList, 290, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, accountList, 30, SpringLayout.NORTH, frame);
 		layout.putConstraint(SpringLayout.SOUTH, accountList, 500, SpringLayout.SOUTH, frame);
-		
 		//Transaction Table
 		transactionTable = new JTable();
 		transactionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		transactionTable.setBorder(new LineBorder(Color.black));
-		layout.putConstraint(SpringLayout.WEST, transactionTable, 305, SpringLayout.WEST, frame);
-		layout.putConstraint(SpringLayout.EAST, transactionTable, 700, SpringLayout.EAST, frame);
+		transactionTable.setBorder(new LineBorder(Color.black));		
+		//Layout for Windows
+		layout.putConstraint(SpringLayout.WEST, transactionTable, 315, SpringLayout.WEST, frame);
+		layout.putConstraint(SpringLayout.EAST, transactionTable, 680, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, transactionTable, 30, SpringLayout.NORTH, frame);
-		layout.putConstraint(SpringLayout.SOUTH, transactionTable, 500, SpringLayout.SOUTH, frame);
-		
+		layout.putConstraint(SpringLayout.SOUTH, transactionTable, 500, SpringLayout.SOUTH, frame);		
 		//Account Calc Box TODO Implementieren und Freigeben
 		/*targetCalculateBox = new JPanel();
 		targetCalculateBox.setBorder(new LineBorder(Color.black));
@@ -144,11 +120,10 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.EAST, targetCalculateBox, 995, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, targetCalculateBox, 250, SpringLayout.NORTH, frame);
 		layout.putConstraint(SpringLayout.SOUTH, targetCalculateBox, 450, SpringLayout.SOUTH, frame);*/
-		
 		//Add Transaction Button
-		addTransactionButton = new JButton("Geld Buchen");
+		addTransactionButton = new JButton("Geld Buchen");		
 		layout.putConstraint(SpringLayout.WEST, addTransactionButton, 705, SpringLayout.WEST, frame);
-		layout.putConstraint(SpringLayout.EAST, addTransactionButton, 995, SpringLayout.EAST, frame);
+		layout.putConstraint(SpringLayout.EAST, addTransactionButton, 960, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, addTransactionButton, 490, SpringLayout.NORTH, frame);
 		layout.putConstraint(SpringLayout.SOUTH, addTransactionButton, 500, SpringLayout.SOUTH, frame);
 		
@@ -195,6 +170,7 @@ public class Swing_View
 		frame.add(addTransactionButton);
 		frame.add(totalBalanceLabel);
 		frame.add(menuBar);
+		
 		
 		//Events
 		accountList.addMouseListener(new MouseAdapter() 
