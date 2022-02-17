@@ -197,6 +197,18 @@ public class DataHolder
 		return -1;
 	}
 	
+	public String GetAccountTargetDate(String account)
+	{
+		for(int i = 0; i < accountsList.size(); i++)
+		{
+			if(accountsList.get(i).split(";")[1].equals(account))
+			{
+				return accountsList.get(i).split(";")[3];
+			}
+		}
+		return null;
+	}
+	
 	private int GetAccountIDFromName(String account)
 	{
 		for(int i = 0; i < accountsList.size(); i++)

@@ -10,6 +10,7 @@ public class FileManager
 	private String homePath;
 	private String userFile;
 	private String dataFile;
+	private String settingsFile;
 	
 	public FileManager()
 	{
@@ -22,6 +23,7 @@ public class FileManager
 		}
 		userFile = homePath + "user.mlf";
 		dataFile = homePath + "data.mlf";
+		settingsFile = homePath + "settings.msf";
 	}
 	
 	public String GetUserFile()
@@ -32,6 +34,11 @@ public class FileManager
 	public String GetDataFile()
 	{
 		return dataFile;
+	}
+	
+	public String GetSettingsFile()
+	{
+		return settingsFile;
 	}
 	
 	public String[] ReadFile(String filepath)

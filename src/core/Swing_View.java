@@ -5,12 +5,14 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.GeneralPath;
 import java.security.PublicKey;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -58,17 +61,39 @@ public class Swing_View
 	private SpringLayout layout;
 	private JList accountList;
 	private DefaultTableModel tableModel;
+	
+	//Labels
 	private JLabel totalBalanceLabel;
+	private JLabel totalTimeToTargetDateLabel;
+	
+	//Calculation Module
 	private JPanel targetCalculateBox;
+	private JTabbedPane calculatorTabs;
+	private JPanel weekSavingPanel;
+	private JPanel halfMonthSavingPanel;
+	private JPanel monthSavingPanel;
+	private JPanel quarterSavingPanel;
+	private JLabel weekSavingDescriptionLabel;
+	private JLabel halfMonthSavingDescriptionLabel;
+	private JLabel monthSavingDescriptionLabel;
+	private JLabel quarterSavingDescriptionLabel;
+	
 	private JButton addTransactionButton;
 	//Menu Bar
 	private JMenuBar menuBar;
+	//General Menu
+	private JMenu generalMenu;
+	private JMenuItem aboutItem;
+	private JMenuItem settingsItem;
+	private JMenuItem exItem;
+	
 	//Account Menu
 	private JMenu accountMenu;
 	private JMenuItem createNewAccountItem;
 	private JMenuItem editAccountItem;
 	private JMenuItem deleteAccountItem;
 	private JMenuItem importAccountListItem;
+	private JMenuItem exportAccountListItem;
 	//Transaction Menu
 	private JMenu transactionMenu;
 	private JMenuItem editTransactionItem;
@@ -138,12 +163,31 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.SOUTH, transactionTable, 500, SpringLayout.SOUTH, frame);
 		
 		//Account Calc Box TODO Implementieren und Freigeben
-		/*targetCalculateBox = new JPanel();
+		targetCalculateBox = new JPanel();
 		targetCalculateBox.setBorder(new LineBorder(Color.black));
 		layout.putConstraint(SpringLayout.WEST, targetCalculateBox, 705, SpringLayout.WEST, frame);
 		layout.putConstraint(SpringLayout.EAST, targetCalculateBox, 995, SpringLayout.EAST, frame);
-		layout.putConstraint(SpringLayout.NORTH, targetCalculateBox, 250, SpringLayout.NORTH, frame);
-		layout.putConstraint(SpringLayout.SOUTH, targetCalculateBox, 450, SpringLayout.SOUTH, frame);*/
+		layout.putConstraint(SpringLayout.NORTH, targetCalculateBox, 300, SpringLayout.NORTH, frame);
+		layout.putConstraint(SpringLayout.SOUTH, targetCalculateBox, 450, SpringLayout.SOUTH, frame);
+		
+		targetCalculateBox.setLayout(new GridLayout());
+		calculatorTabs = new JTabbedPane();
+		calculatorTabs.setEnabled(false);
+		
+		weekSavingPanel = new JPanel();
+		weekSavingPanel.setLayout(new GridLayout());
+		monthSavingPanel = new JPanel();
+		monthSavingPanel.setLayout(new GridLayout());
+		weekSavingDescriptionLabel = new JLabel("");
+		monthSavingDescriptionLabel = new JLabel("");
+		
+		weekSavingPanel.add(weekSavingDescriptionLabel);
+		monthSavingPanel.add(monthSavingDescriptionLabel);
+		
+		calculatorTabs.addTab("Woche", weekSavingPanel);
+		calculatorTabs.addTab("Monat", monthSavingPanel);
+		
+		targetCalculateBox.add(calculatorTabs);
 		
 		//Add Transaction Button
 		addTransactionButton = new JButton("Geld Buchen");
@@ -153,15 +197,30 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.SOUTH, addTransactionButton, 500, SpringLayout.SOUTH, frame);
 		
 		//Labels
-		totalBalanceLabel = new JLabel("0€");
+		totalBalanceLabel = new JLabel("0" + Static_Settings.GetCurrency());
 		Font balanceFont = new Font("arial", 0, 32);
 		totalBalanceLabel.setFont(balanceFont);
 		layout.putConstraint(SpringLayout.WEST, totalBalanceLabel, 705, SpringLayout.WEST, frame);
 		layout.putConstraint(SpringLayout.EAST, totalBalanceLabel, 1000, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, totalBalanceLabel, 30, SpringLayout.NORTH, frame);
 		
+		totalTimeToTargetDateLabel = new JLabel("");
+		layout.putConstraint(SpringLayout.WEST, totalTimeToTargetDateLabel, 705, SpringLayout.WEST, frame);
+		layout.putConstraint(SpringLayout.EAST, totalTimeToTargetDateLabel, 1000, SpringLayout.EAST, frame);
+		layout.putConstraint(SpringLayout.NORTH, totalTimeToTargetDateLabel, 270, SpringLayout.NORTH, frame);
+		
 		//Menu Bar, Menus und Items
 		menuBar = new JMenuBar();
+		//General Menu
+		generalMenu = new JMenu("Allgemein");
+		aboutItem = new JMenuItem("Über Sparbuch");
+		settingsItem = new JMenuItem("Einstellungen");
+		exItem = new JMenuItem("Beenden");
+		
+		generalMenu.add(aboutItem);
+		generalMenu.add(settingsItem);
+		generalMenu.add(new JSeparator());
+		generalMenu.add(exItem);
 		//Account Menu
 		accountMenu = new JMenu("Konten");
 		createNewAccountItem = new JMenuItem("Neues Konto erstellen");
@@ -185,15 +244,17 @@ public class Swing_View
 		editTransactionItem.setEnabled(false);
 		deleteTransactionItem.setEnabled(false);
 		
+		//menuBar.add(generalMenu); Einbauen wenn Fertig
 		menuBar.add(accountMenu);
 		menuBar.add(transactionMenu);
 		
 		frame.setLayout(layout);
 		frame.add(accountList);
 		frame.add(transactionTable);
-		//frame.add(targetCalculateBox);
+		frame.add(targetCalculateBox);
 		frame.add(addTransactionButton);
 		frame.add(totalBalanceLabel);
+		frame.add(totalTimeToTargetDateLabel);
 		frame.add(menuBar);
 		
 		//Events
@@ -277,6 +338,7 @@ public class Swing_View
 				fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
 				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
 				UpdateAccountsList();
+				UpdateBalanceText();
 			}
 		});
 		
@@ -334,6 +396,7 @@ public class Swing_View
 		});
 		
 		UpdateAccountsList();
+		UpdateBalanceText();
 	}
 	
 	private void UpdateTransactionTable(ArrayList<String> transactions) 
@@ -356,18 +419,63 @@ public class Swing_View
 	
 	private void UpdateBalanceText()
 	{
+		if(accountList.getSelectedIndex() == -1)
+		{
+			totalBalanceLabel.setText("Konto auswählen");
+			weekSavingDescriptionLabel.setText("");
+			monthSavingDescriptionLabel.setText("");
+			totalTimeToTargetDateLabel.setText("");
+			addTransactionButton.setEnabled(false);
+			return;
+		}
+		else 
+		{
+			addTransactionButton.setEnabled(true);
+		}
 		ArrayList<String> transactions = dh.GetTransactionsForAccount(accountList.getSelectedValue().toString());
 		UpdateTransactionTable(transactions);
 		float target = dh.GetAccountTarget(accountList.getSelectedValue().toString());
 		float balance = calc.CalculateTotalBalance(transactions);
+		float difference = 0.0f;
 		if(target == -1)
 		{
-			totalBalanceLabel.setText("<html><body>" + balance + "€<br><br>Kein Ziel Gesetzt</body></html>");
+			totalBalanceLabel.setText("<html><body>" + balance + Static_Settings.GetCurrency() + "<br><br>Kein Ziel Gesetzt</body></html>");
 		}
 		else 
 		{
-			float difference = target - balance;
-			totalBalanceLabel.setText("<html><body>" + balance + "€ /<br>" + target + "€<br><br>noch " + difference + "€ bis zum Ziel</body></html>");
+			difference = target - balance;
+			totalBalanceLabel.setText("<html><body>" + balance + Static_Settings.GetCurrency() + " /<br>" + target + Static_Settings.GetCurrency() + "<br><br>noch " + difference + Static_Settings.GetCurrency() + " bis zum Ziel</body></html>");
+		}
+		
+		//Prüfe ob Target Date vorhanden wenn ja aktiviere das Berechnungsmodul
+		String date = dh.GetAccountTargetDate(accountList.getSelectedValue().toString());
+		if(date.equals("none"))
+		{
+			totalTimeToTargetDateLabel.setText("Kein Zieldatum angegeben.");
+			weekSavingDescriptionLabel.setText("<html><body>Für die Berechnung muss ein Zieldatum angegeben sein.</body></html>");
+			monthSavingDescriptionLabel.setText("<html><body>Für die Berechnung muss ein Zieldatum angegeben sein.</body></html>");
+			calculatorTabs.setEnabled(false);
+		}
+		else 
+		{
+			int days = calc.CalculateDaysToTargetDate(date);
+			totalTimeToTargetDateLabel.setText("<html><body>Zieldatum: " + date + "<br>" + days + " Tage verbleibend</body></html>");
+			calculatorTabs.setEnabled(true);
+			if(calc.CalculateMonthsFromDays(days) <= 0)
+			{
+				calculatorTabs.setEnabledAt(1, false);
+			}
+			else 
+			{
+				calculatorTabs.setEnabledAt(1, true);
+			}
+			
+			if(calc.CalculateWeeksFromDays(days) <= 0)
+			{
+				days = 7;
+			}
+			weekSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateWeeksFromDays(days) + " Wochen verbleibend. Sparen Sie pro Woche " + calc.CalculateMoneyPerWeek(days, difference) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
+			monthSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateWeeksFromDays(days) + " Wochen verbleibend. Sparen Sie pro Monat " + calc.CalculateMoneyPerMonth(days, difference) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
 		}
 	}
 	
