@@ -47,6 +47,17 @@ public class Calculator
 		return weeks / 4;
 	}
 	
+	public int CalculateQuartersFromDays(int days)
+	{
+		int months = CalculateMonthsFromDays(days);
+		return months / 3;
+	}
+	
+	public int CalculateYearsFromDays(int days)
+	{
+		return days / 365;
+	}
+	
 	public float CalculateMoneyPerWeek(int days, float missingMoney)
 	{
 		int weeks = CalculateWeeksFromDays(days);
@@ -57,5 +68,15 @@ public class Calculator
 	{
 		int months = CalculateMonthsFromDays(days);
 		return missingMoney / months;
+	}
+	
+	public float CalculateMoneyPerQuarter(int days, float missingMoney)
+	{
+		return missingMoney / CalculateQuartersFromDays(days);
+	}
+	
+	public float CalculateMoneyPerYear(int days, float missingMoney)
+	{
+		return missingMoney / CalculateYearsFromDays(days);
 	}
 }

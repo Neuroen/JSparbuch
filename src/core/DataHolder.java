@@ -35,6 +35,18 @@ public class DataHolder
 		return null;
 	}
 	
+	public String GetAccountNameByID(int id)
+	{
+		for(int i = 0; i < accountsList.size(); i++)
+		{
+			if(Integer.parseInt(accountsList.get(i).split(";")[0]) == id)
+			{
+				return accountsList.get(i).split(";")[1];
+			}
+		}
+		return null;
+	}
+	
 	public void EditAccount(String oldName, String newValue)
 	{
 		for(int i = 0; i < accountsList.size(); i++)
@@ -74,6 +86,18 @@ public class DataHolder
 			}
 			id++;
 		}
+	}
+	
+	public boolean CheckIfAccountExists(String account)
+	{
+		for(int i = 0; i < accountsList.size(); i++)
+		{
+			if(accountsList.get(i).split(";")[1].equals(account))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void DeleteAccount(String account)
@@ -156,6 +180,19 @@ public class DataHolder
 		for(int i = 0; i < transactionsList.size(); i++)
 		{
 			transactionDataString += transactionsList.get(i) + "\n";
+		}
+		return transactionDataString;
+	}
+	
+	public String GetTransactionDataAsStringFormattetForExport()
+	{
+		String transactionDataString = "";
+		for(int i = 0; i < transactionsList.size(); i++)
+		{
+			transactionDataString += GetAccountNameByID(Integer.parseInt(transactionsList.get(i).split(";")[0]));
+			transactionDataString += transactionsList.get(i).split(";")[1]; //Date
+			transactionDataString += transactionsList.get(i).split(";")[2]; //Description
+			transactionDataString += transactionsList.get(i).split(";")[3]; //Value
 		}
 		return transactionDataString;
 	}

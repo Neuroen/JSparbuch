@@ -23,6 +23,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -38,6 +39,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
@@ -70,13 +73,13 @@ public class Swing_View
 	private JPanel targetCalculateBox;
 	private JTabbedPane calculatorTabs;
 	private JPanel weekSavingPanel;
-	private JPanel halfMonthSavingPanel;
 	private JPanel monthSavingPanel;
 	private JPanel quarterSavingPanel;
+	private JPanel yearSavingPanel;
 	private JLabel weekSavingDescriptionLabel;
-	private JLabel halfMonthSavingDescriptionLabel;
 	private JLabel monthSavingDescriptionLabel;
 	private JLabel quarterSavingDescriptionLabel;
+	private JLabel yearSavingDescriptionLabel;
 	
 	private JButton addTransactionButton;
 	//Menu Bar
@@ -86,7 +89,6 @@ public class Swing_View
 	private JMenuItem aboutItem;
 	private JMenuItem settingsItem;
 	private JMenuItem exItem;
-	
 	//Account Menu
 	private JMenu accountMenu;
 	private JMenuItem createNewAccountItem;
@@ -162,7 +164,7 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.NORTH, transactionTable, 30, SpringLayout.NORTH, frame);
 		layout.putConstraint(SpringLayout.SOUTH, transactionTable, 500, SpringLayout.SOUTH, frame);
 		
-		//Account Calc Box TODO Implementieren und Freigeben
+		//Account Calc Box
 		targetCalculateBox = new JPanel();
 		targetCalculateBox.setBorder(new LineBorder(Color.black));
 		layout.putConstraint(SpringLayout.WEST, targetCalculateBox, 705, SpringLayout.WEST, frame);
@@ -176,16 +178,30 @@ public class Swing_View
 		
 		weekSavingPanel = new JPanel();
 		weekSavingPanel.setLayout(new GridLayout());
+		
 		monthSavingPanel = new JPanel();
 		monthSavingPanel.setLayout(new GridLayout());
+		
+		quarterSavingPanel = new JPanel();
+		quarterSavingPanel.setLayout(new GridLayout());
+		
+		yearSavingPanel = new JPanel();
+		yearSavingPanel.setLayout(new GridLayout());
+		
 		weekSavingDescriptionLabel = new JLabel("");
 		monthSavingDescriptionLabel = new JLabel("");
+		quarterSavingDescriptionLabel = new JLabel("");
+		yearSavingDescriptionLabel = new JLabel("");
 		
 		weekSavingPanel.add(weekSavingDescriptionLabel);
 		monthSavingPanel.add(monthSavingDescriptionLabel);
+		quarterSavingPanel.add(quarterSavingDescriptionLabel);
+		yearSavingPanel.add(yearSavingDescriptionLabel);
 		
 		calculatorTabs.addTab("Woche", weekSavingPanel);
 		calculatorTabs.addTab("Monat", monthSavingPanel);
+		calculatorTabs.addTab("Quartal", quarterSavingPanel);
+		calculatorTabs.addTab("Jahr", yearSavingPanel);
 		
 		targetCalculateBox.add(calculatorTabs);
 		
@@ -227,18 +243,21 @@ public class Swing_View
 		editAccountItem = new JMenuItem("Konto Bearbeiten");
 		deleteAccountItem = new JMenuItem("Konto Löschen");
 		importAccountListItem = new JMenuItem("Kontenliste Importieren");
-		//TODO: Exportliste
+		exportAccountListItem = new JMenuItem("Kontenliste Exportieren");
+		
 		accountMenu.add(createNewAccountItem);
 		accountMenu.add(editAccountItem);
 		accountMenu.add(deleteAccountItem);
 		accountMenu.add(new JSeparator());
-		//accountMenu.add(importAccountListItem); Freigeben wenn Fertig
+		accountMenu.add(importAccountListItem);
+		accountMenu.add(exportAccountListItem);
 		editAccountItem.setEnabled(false);
 		deleteAccountItem.setEnabled(false);
 		//Transaction Menu
 		transactionMenu = new JMenu("Transaktionen");
 		editTransactionItem = new JMenuItem("Transaktion Bearbeiten");
 		deleteTransactionItem = new JMenuItem("Transaktion Löschen");
+		
 		transactionMenu.add(editTransactionItem);
 		transactionMenu.add(deleteTransactionItem);
 		editTransactionItem.setEnabled(false);
@@ -337,8 +356,56 @@ public class Swing_View
 				dh.DeleteAccount(accountList.getSelectedValue().toString());
 				fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
 				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
+				editAccountItem.setEnabled(false);
+				deleteAccountItem.setEnabled(false);
 				UpdateAccountsList();
 				UpdateBalanceText();
+			}
+		});
+		
+		importAccountListItem.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				JFileChooser jfc = new JFileChooser();
+				FileFilter fileFilter = new FileNameExtensionFilter("Morton List File", "mlf");
+				jfc.setFileFilter(fileFilter);
+				jfc.setDialogType(JFileChooser.SAVE_DIALOG);
+				jfc.setDialogTitle("Kontenliste Importieren");
+				jfc.setMultiSelectionEnabled(false);
+				int result = jfc.showDialog(frame, "Importieren");
+				if(result == JFileChooser.APPROVE_OPTION)
+				{
+					String[] data = fm.ReadFile(jfc.getSelectedFile().getAbsolutePath());
+					for(int i = 0; i < data.length; i++)
+					{
+						String currentAccount = data[i].substring(data[i].indexOf(";") + 1);
+						if(!dh.CheckIfAccountExists(currentAccount))
+						{
+							dh.InsertNewAccount(currentAccount);
+						}
+					}
+					fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
+					UpdateAccountsList();
+				}
+			}
+		});
+		
+		exportAccountListItem.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				JFileChooser jfc = new JFileChooser();
+				FileFilter fileFilter = new FileNameExtensionFilter("Morton List File", "mlf");
+				jfc.setFileFilter(fileFilter);
+				jfc.setDialogType(JFileChooser.SAVE_DIALOG);
+				jfc.setDialogTitle("Kontenliste Exportieren");
+				jfc.setMultiSelectionEnabled(false);
+				int result = jfc.showDialog(frame, "Exportieren");
+				if(result == JFileChooser.APPROVE_OPTION)
+				{
+					fm.WriteFile(jfc.getSelectedFile().getAbsolutePath() + ".mlf", dh.GetAccountDataAsStringFormattet());
+				}
 			}
 		});
 		
@@ -454,28 +521,55 @@ public class Swing_View
 			totalTimeToTargetDateLabel.setText("Kein Zieldatum angegeben.");
 			weekSavingDescriptionLabel.setText("<html><body>Für die Berechnung muss ein Zieldatum angegeben sein.</body></html>");
 			monthSavingDescriptionLabel.setText("<html><body>Für die Berechnung muss ein Zieldatum angegeben sein.</body></html>");
+			quarterSavingDescriptionLabel.setText("<html><body>Für die Berechnung muss ein Zieldatum angegeben sein.</body></html>");
+			yearSavingDescriptionLabel.setText("<html><body>Für die Berechnung muss ein Zieldatum angegeben sein.</body></html>");
 			calculatorTabs.setEnabled(false);
 		}
 		else 
 		{
 			int days = calc.CalculateDaysToTargetDate(date);
+			CheckTabAvailbillity(days);
 			totalTimeToTargetDateLabel.setText("<html><body>Zieldatum: " + date + "<br>" + days + " Tage verbleibend</body></html>");
 			calculatorTabs.setEnabled(true);
-			if(calc.CalculateMonthsFromDays(days) <= 0)
-			{
-				calculatorTabs.setEnabledAt(1, false);
-			}
-			else 
-			{
-				calculatorTabs.setEnabledAt(1, true);
-			}
-			
 			if(calc.CalculateWeeksFromDays(days) <= 0)
 			{
 				days = 7;
 			}
-			weekSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateWeeksFromDays(days) + " Wochen verbleibend. Sparen Sie pro Woche " + calc.CalculateMoneyPerWeek(days, difference) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
-			monthSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateWeeksFromDays(days) + " Wochen verbleibend. Sparen Sie pro Monat " + calc.CalculateMoneyPerMonth(days, difference) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
+			weekSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateWeeksFromDays(days) + " Wochen verbleibend. Sparen Sie pro Woche " + String.format("%.02f", calc.CalculateMoneyPerWeek(days, difference)) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
+			monthSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateMonthsFromDays(days) + " Monat(e) verbleibend. Sparen Sie pro Monat " + String.format("%.02f", calc.CalculateMoneyPerMonth(days, difference)) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
+			quarterSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateQuartersFromDays(days) + " Quartal(e) verbleibend. Sparen Sie pro Quartal " + String.format("%.02f", calc.CalculateMoneyPerQuarter(days, difference)) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
+			yearSavingDescriptionLabel.setText("<html><body>Noch " + calc.CalculateYearsFromDays(days) + " Quartal(e) verbleibend. Sparen Sie pro Quartal " + String.format("%.02f", calc.CalculateMoneyPerYear(days, difference)) + Static_Settings.GetCurrency() + " um das Ziel zu erreichen</body></html>");
+		}
+	}
+	
+	private void CheckTabAvailbillity(int days)
+	{
+		//Check Months
+		if(calc.CalculateMonthsFromDays(days) <= 0)
+		{
+			calculatorTabs.setEnabledAt(1, false);
+		}
+		else 
+		{
+			calculatorTabs.setEnabledAt(1, true);
+		}
+		//Check Quarter
+		if(calc.CalculateMonthsFromDays(days) < 3)
+		{
+			calculatorTabs.setEnabledAt(2, false);
+		}
+		else 
+		{
+			calculatorTabs.setEnabledAt(2, true);
+		}
+		//Check Year
+		if(calc.CalculateMonthsFromDays(days) < 12)
+		{
+			calculatorTabs.setEnabledAt(3, false);
+		}
+		else 
+		{
+			calculatorTabs.setEnabledAt(3, true);
 		}
 	}
 	
@@ -488,5 +582,13 @@ public class Swing_View
 			model.addElement(accounts.get(i).split(";")[1]);
 		}
 		accountList.setModel(model);
+		if(accounts.size() > 0)
+		{
+			exportAccountListItem.setEnabled(true);
+		}
+		else 
+		{
+			exportAccountListItem.setEnabled(false);
+		}
 	}
 }
