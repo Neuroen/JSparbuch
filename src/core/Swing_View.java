@@ -19,8 +19,12 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.swing.JFrame;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -70,7 +74,9 @@ public class Swing_View
 	private JLabel totalTimeToTargetDateLabel;
 	
 	//Calculation Module
-	private JPanel targetCalculateBox;
+	private JTabbedPane targetCalculateBox;
+	private JPanel savingForTargetMenu;
+	private JPanel savingForecastMenu;
 	private JTabbedPane calculatorTabs;
 	private JPanel weekSavingPanel;
 	private JPanel monthSavingPanel;
@@ -80,6 +86,15 @@ public class Swing_View
 	private JLabel monthSavingDescriptionLabel;
 	private JLabel quarterSavingDescriptionLabel;
 	private JLabel yearSavingDescriptionLabel;
+	//Calculation Module - Forecast Panel
+	private JLabel timeUnitSelectionLabel;
+	private JComboBox<String> timeUnitSelectorBox;
+	private JTextField timeInputField;
+	private JCheckBox forecastUseTransactionMiddleValueCheckBox;
+	private JLabel moneyValueInputLabel;
+	private JTextField moneyValueForForecasField;
+	private JLabel forecastResultLabel;
+	private SpringLayout forecastBoxLayout;
 	
 	private JButton addTransactionButton;
 	//Menu Bar
@@ -165,14 +180,52 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.SOUTH, transactionTable, 500, SpringLayout.SOUTH, frame);
 		
 		//Account Calc Box
-		targetCalculateBox = new JPanel();
-		targetCalculateBox.setBorder(new LineBorder(Color.black));
+		targetCalculateBox = new JTabbedPane();
 		layout.putConstraint(SpringLayout.WEST, targetCalculateBox, 705, SpringLayout.WEST, frame);
 		layout.putConstraint(SpringLayout.EAST, targetCalculateBox, 995, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, targetCalculateBox, 300, SpringLayout.NORTH, frame);
 		layout.putConstraint(SpringLayout.SOUTH, targetCalculateBox, 450, SpringLayout.SOUTH, frame);
 		
-		targetCalculateBox.setLayout(new GridLayout());
+		savingForTargetMenu = new JPanel();
+		savingForTargetMenu.setLayout(new GridLayout());
+		
+		savingForecastMenu = new JPanel();
+		forecastBoxLayout = new SpringLayout();
+		savingForecastMenu.setLayout(forecastBoxLayout);
+		
+		//Forecast Menu Init
+		timeUnitSelectionLabel = new JLabel("Zeit auswählen:");
+		timeUnitSelectorBox = new JComboBox<String>();
+		timeInputField = new JTextField();
+		forecastUseTransactionMiddleValueCheckBox = new JCheckBox("Einzahlungsmittelwert benutzen");
+		forecastResultLabel = new JLabel("Test");
+		savingForecastMenu.add(timeUnitSelectionLabel);
+		savingForecastMenu.add(timeUnitSelectorBox);
+		savingForecastMenu.add(timeInputField);
+		savingForecastMenu.add(forecastUseTransactionMiddleValueCheckBox);
+		savingForecastMenu.add(forecastResultLabel);
+		
+		timeUnitSelectorBox.addItem("Woche(n)");
+		timeUnitSelectorBox.addItem("Monat(e)");
+		timeUnitSelectorBox.addItem("Quartal(e)");
+		timeUnitSelectorBox.addItem("Jahr(e)");
+		
+		//Set Positions
+		forecastBoxLayout.putConstraint(SpringLayout.EAST, timeUnitSelectorBox, -5, SpringLayout.EAST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, timeUnitSelectorBox, 5, SpringLayout.NORTH, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.EAST, timeInputField, -110, SpringLayout.EAST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.WEST, timeInputField, 130, SpringLayout.WEST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, timeInputField, 7, SpringLayout.NORTH, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.WEST, timeUnitSelectionLabel, 5, SpringLayout.WEST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, timeUnitSelectionLabel, 10, SpringLayout.NORTH, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.WEST, forecastUseTransactionMiddleValueCheckBox, 5, SpringLayout.WEST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, forecastUseTransactionMiddleValueCheckBox, 30, SpringLayout.NORTH, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.WEST, forecastResultLabel, 5, SpringLayout.WEST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.EAST, forecastResultLabel, -5, SpringLayout.EAST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, forecastResultLabel, 100, SpringLayout.NORTH, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.SOUTH, forecastResultLabel, 5, SpringLayout.SOUTH, savingForecastMenu);
+		
+		
 		calculatorTabs = new JTabbedPane();
 		calculatorTabs.setEnabled(false);
 		
@@ -203,7 +256,10 @@ public class Swing_View
 		calculatorTabs.addTab("Quartal", quarterSavingPanel);
 		calculatorTabs.addTab("Jahr", yearSavingPanel);
 		
-		targetCalculateBox.add(calculatorTabs);
+		savingForTargetMenu.add(calculatorTabs);
+		
+		targetCalculateBox.addTab("Sparhilfe", savingForTargetMenu);
+		targetCalculateBox.addTab("Spar Prognose", savingForecastMenu);
 		
 		//Add Transaction Button
 		addTransactionButton = new JButton("Geld Buchen");
