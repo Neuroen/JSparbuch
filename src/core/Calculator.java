@@ -79,4 +79,19 @@ public class Calculator
 	{
 		return missingMoney / CalculateYearsFromDays(days);
 	}
+	
+	public float CalculateForecast(int time, float moneyToSave)
+	{
+		return moneyToSave * time;
+	}
+	
+	public float CalculateMiddleValueFromTransactions(ArrayList<String> selectedTransactionList)
+	{
+		float totalValue = 0;
+		for(int i = 0; i < selectedTransactionList.size(); i++)
+		{
+			totalValue += Float.parseFloat(selectedTransactionList.get(i).split(";")[3]);
+		}
+		return totalValue / selectedTransactionList.size();
+	}
 }

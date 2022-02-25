@@ -1,39 +1,25 @@
 package core;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.geom.GeneralPath;
-import java.security.PublicKey;
-import java.security.KeyStore.PrivateKeyEntry;
 import java.util.ArrayList;
-import java.util.Properties;
-
 import javax.swing.JFrame;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -41,21 +27,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-
-import org.jdatepicker.impl.DateComponentFormatter;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-import org.jdatepicker.*;
 
 public class Swing_View 
 {
@@ -95,6 +72,8 @@ public class Swing_View
 	private JTextField moneyValueForForecasField;
 	private JLabel forecastResultLabel;
 	private SpringLayout forecastBoxLayout;
+	//Calculation Module Vars
+	private int oldTimeUnitSelection = 0;
 	
 	private JButton addTransactionButton;
 	//Menu Bar
@@ -198,13 +177,18 @@ public class Swing_View
 		timeUnitSelectorBox = new JComboBox<String>();
 		timeInputField = new JTextField();
 		forecastUseTransactionMiddleValueCheckBox = new JCheckBox("Einzahlungsmittelwert benutzen");
+		moneyValueInputLabel = new JLabel("Einzahlung eingeben:");
+		moneyValueForForecasField = new JTextField();
 		forecastResultLabel = new JLabel("Test");
 		savingForecastMenu.add(timeUnitSelectionLabel);
 		savingForecastMenu.add(timeUnitSelectorBox);
 		savingForecastMenu.add(timeInputField);
 		savingForecastMenu.add(forecastUseTransactionMiddleValueCheckBox);
+		savingForecastMenu.add(moneyValueInputLabel);
+		savingForecastMenu.add(moneyValueForForecasField);
 		savingForecastMenu.add(forecastResultLabel);
 		
+		timeUnitSelectorBox.addItem("Tag(e)");
 		timeUnitSelectorBox.addItem("Woche(n)");
 		timeUnitSelectorBox.addItem("Monat(e)");
 		timeUnitSelectorBox.addItem("Quartal(e)");
@@ -213,18 +197,28 @@ public class Swing_View
 		//Set Positions
 		forecastBoxLayout.putConstraint(SpringLayout.EAST, timeUnitSelectorBox, -5, SpringLayout.EAST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.NORTH, timeUnitSelectorBox, 5, SpringLayout.NORTH, savingForecastMenu);
+		
 		forecastBoxLayout.putConstraint(SpringLayout.EAST, timeInputField, -110, SpringLayout.EAST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.WEST, timeInputField, 130, SpringLayout.WEST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.NORTH, timeInputField, 7, SpringLayout.NORTH, savingForecastMenu);
+		
 		forecastBoxLayout.putConstraint(SpringLayout.WEST, timeUnitSelectionLabel, 5, SpringLayout.WEST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.NORTH, timeUnitSelectionLabel, 10, SpringLayout.NORTH, savingForecastMenu);
+		
 		forecastBoxLayout.putConstraint(SpringLayout.WEST, forecastUseTransactionMiddleValueCheckBox, 5, SpringLayout.WEST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.NORTH, forecastUseTransactionMiddleValueCheckBox, 30, SpringLayout.NORTH, savingForecastMenu);
+		
+		forecastBoxLayout.putConstraint(SpringLayout.WEST, moneyValueInputLabel, 5, SpringLayout.WEST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, moneyValueInputLabel, 62, SpringLayout.NORTH, savingForecastMenu);
+		
+		forecastBoxLayout.putConstraint(SpringLayout.EAST, moneyValueForForecasField, -5, SpringLayout.EAST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.WEST, moneyValueForForecasField, 170, SpringLayout.WEST, savingForecastMenu);
+		forecastBoxLayout.putConstraint(SpringLayout.NORTH, moneyValueForForecasField, 60, SpringLayout.NORTH, savingForecastMenu);
+		
 		forecastBoxLayout.putConstraint(SpringLayout.WEST, forecastResultLabel, 5, SpringLayout.WEST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.EAST, forecastResultLabel, -5, SpringLayout.EAST, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.NORTH, forecastResultLabel, 100, SpringLayout.NORTH, savingForecastMenu);
 		forecastBoxLayout.putConstraint(SpringLayout.SOUTH, forecastResultLabel, 5, SpringLayout.SOUTH, savingForecastMenu);
-		
 		
 		calculatorTabs = new JTabbedPane();
 		calculatorTabs.setEnabled(false);
@@ -261,6 +255,9 @@ public class Swing_View
 		targetCalculateBox.addTab("Sparhilfe", savingForTargetMenu);
 		targetCalculateBox.addTab("Spar Prognose", savingForecastMenu);
 		
+		targetCalculateBox.setEnabledAt(0, false);
+		targetCalculateBox.setEnabledAt(1, false);
+		
 		//Add Transaction Button
 		addTransactionButton = new JButton("Geld Buchen");
 		layout.putConstraint(SpringLayout.WEST, addTransactionButton, 705, SpringLayout.WEST, frame);
@@ -293,6 +290,7 @@ public class Swing_View
 		generalMenu.add(settingsItem);
 		generalMenu.add(new JSeparator());
 		generalMenu.add(exItem);
+		
 		//Account Menu
 		accountMenu = new JMenu("Konten");
 		createNewAccountItem = new JMenuItem("Neues Konto erstellen");
@@ -309,6 +307,7 @@ public class Swing_View
 		accountMenu.add(exportAccountListItem);
 		editAccountItem.setEnabled(false);
 		deleteAccountItem.setEnabled(false);
+		
 		//Transaction Menu
 		transactionMenu = new JMenu("Transaktionen");
 		editTransactionItem = new JMenuItem("Transaktion Bearbeiten");
@@ -337,11 +336,21 @@ public class Swing_View
 		{
 			public void mouseClicked(MouseEvent event)
 			{
-				UpdateBalanceText();
 				if(accountList.getSelectedIndex() != -1)
 				{
+					UpdateBalanceText();
+					UpdateCalculatorBoxForecast();
+					targetCalculateBox.setEnabledAt(1, true);
 					editAccountItem.setEnabled(true);
 					deleteAccountItem.setEnabled(true);
+					if(transactionTable.getRowCount() > 0)
+					{
+						forecastUseTransactionMiddleValueCheckBox.setEnabled(true);
+					}
+					else 
+					{
+						forecastUseTransactionMiddleValueCheckBox.setEnabled(false);
+					}
 				}
 			}
 		});
@@ -518,8 +527,134 @@ public class Swing_View
 			}
 		});
 		
+		//Calculator Module Events
+		
+		forecastUseTransactionMiddleValueCheckBox.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				if(forecastUseTransactionMiddleValueCheckBox.isSelected())
+				{
+					moneyValueForForecasField.setEnabled(false);
+				}
+				else
+				{
+					moneyValueForForecasField.setEnabled(true);
+				}
+				UpdateCalculatorBoxForecast();
+			}
+		});
+		
+		timeInputField.getDocument().addDocumentListener(new DocumentListener() 
+		{	
+			public void removeUpdate(DocumentEvent e) {}
+			
+			public void insertUpdate(DocumentEvent e) 
+			{
+				UpdateCalculatorBoxForecast();
+			}
+			
+			public void changedUpdate(DocumentEvent e) {}
+		});
+		
+		moneyValueForForecasField.getDocument().addDocumentListener(new DocumentListener() 
+		{
+			public void removeUpdate(DocumentEvent e) {}
+			
+			public void insertUpdate(DocumentEvent e) 
+			{
+				UpdateCalculatorBoxForecast();
+			}
+			
+			public void changedUpdate(DocumentEvent e) {}
+		});
+		
+		timeUnitSelectorBox.addActionListener(new ActionListener() 
+		{	
+			public void actionPerformed(ActionEvent e) 
+			{
+				
+				if(oldTimeUnitSelection != timeUnitSelectorBox.getSelectedIndex())
+				{
+					switch (oldTimeUnitSelection) 
+					{
+						case 0: //Days
+							timeInputField.setText("1");
+							break;
+						case 1: //Weeks
+							if(timeUnitSelectorBox.getSelectedIndex() == 0)
+							{
+								timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 7 + "");
+							}
+							else 
+							{
+								timeInputField.setText("1");
+							}
+							break;
+						case 2: //Months
+							switch (timeUnitSelectorBox.getSelectedIndex()) 
+							{
+								case 0:
+									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 31 + "");
+									break;
+								case 1:
+									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 4 + "");
+									break;
+								default:
+									timeInputField.setText("1");
+									break;
+							}
+							break;
+						case 3: //Quarters
+							switch (timeUnitSelectorBox.getSelectedIndex()) 
+							{
+								case 0:
+									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 3) * 31 + "");
+									break;
+								case 1:
+									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 3) * 4 + "");
+									break;
+								case 2:
+									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 3 + "");
+									break;
+								default:
+									timeInputField.setText("1");
+									break;
+							}
+							break;
+						case 4: //Years
+							switch (timeUnitSelectorBox.getSelectedIndex()) 
+							{
+								case 0:
+									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 365) + "");
+									break;
+								case 1:
+									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 52) + "");
+									break;
+								case 2:
+									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 12 + "");
+									break;
+								case 3:
+									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 4 + "");
+									break;
+								default:
+									timeInputField.setText("1");
+									break;
+							}
+							break;
+	
+						default:
+							break;
+					}
+					oldTimeUnitSelection = timeUnitSelectorBox.getSelectedIndex();
+				}
+				UpdateCalculatorBoxForecast();
+			}
+		});
+		
 		UpdateAccountsList();
 		UpdateBalanceText();
+		UpdateCalculatorBoxForecast();
 	}
 	
 	private void UpdateTransactionTable(ArrayList<String> transactions) 
@@ -562,10 +697,13 @@ public class Swing_View
 		float difference = 0.0f;
 		if(target == -1)
 		{
+			targetCalculateBox.setEnabledAt(0, false);
+			targetCalculateBox.setSelectedIndex(1);
 			totalBalanceLabel.setText("<html><body>" + balance + Static_Settings.GetCurrency() + "<br><br>Kein Ziel Gesetzt</body></html>");
 		}
 		else 
 		{
+			targetCalculateBox.setEnabledAt(0, true);
 			difference = target - balance;
 			totalBalanceLabel.setText("<html><body>" + balance + Static_Settings.GetCurrency() + " /<br>" + target + Static_Settings.GetCurrency() + "<br><br>noch " + difference + Static_Settings.GetCurrency() + " bis zum Ziel</body></html>");
 		}
@@ -645,6 +783,39 @@ public class Swing_View
 		else 
 		{
 			exportAccountListItem.setEnabled(false);
+		}
+	}
+	
+	private void UpdateCalculatorBoxForecast()
+	{
+		if(timeInputField.getText().length() <= 0)
+		{
+			forecastResultLabel.setText("Für Prognose Daten eingeben.");
+			return;
+		}
+		
+		if(!forecastUseTransactionMiddleValueCheckBox.isSelected())
+		{
+			if(moneyValueForForecasField.getText().length() <= 0)
+			{
+				forecastResultLabel.setText("Für Prognose Daten eingeben.");
+				return;
+			}
+			float moneyToSave = Float.parseFloat(moneyValueForForecasField.getText());
+			int time = Integer.parseInt(timeInputField.getText());
+			float result = calc.CalculateForecast(time, moneyToSave);
+			forecastResultLabel.setText("<html><body>Wenn Sie jede(n) " + timeUnitSelectorBox.getSelectedItem() + " " + moneyToSave + 
+					Static_Settings.GetCurrency() + " Für " + time + " " + timeUnitSelectorBox.getSelectedItem() + " Sparen haben Sie nach ablauf " + result + Static_Settings.GetCurrency() 
+					+ " Erspart");
+		}
+		else 
+		{
+			float moneyToSave = calc.CalculateMiddleValueFromTransactions(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
+			int time = Integer.parseInt(timeInputField.getText());
+			float result = calc.CalculateForecast(time, moneyToSave);
+			forecastResultLabel.setText("<html><body>Wenn Sie jede(n) " + timeUnitSelectorBox.getSelectedItem() + " " + String.format("%.02f", moneyToSave) + 
+					Static_Settings.GetCurrency() + " Für " + time + " " + timeUnitSelectorBox.getSelectedItem() + " Sparen haben Sie nach ablauf " + String.format("%.02f", result) + Static_Settings.GetCurrency() 
+					+ " Erspart");
 		}
 	}
 }
