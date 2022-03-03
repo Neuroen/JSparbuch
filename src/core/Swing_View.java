@@ -49,6 +49,8 @@ public class Swing_View
 	//Labels
 	private JLabel totalBalanceLabel;
 	private JLabel totalTimeToTargetDateLabel;
+	private JLabel accountsCounterLabel;
+	private JLabel transactionCounterLabel;
 	
 	//Calculation Module
 	private JTabbedPane targetCalculateBox;
@@ -278,6 +280,14 @@ public class Swing_View
 		layout.putConstraint(SpringLayout.EAST, totalTimeToTargetDateLabel, 1000, SpringLayout.EAST, frame);
 		layout.putConstraint(SpringLayout.NORTH, totalTimeToTargetDateLabel, 270, SpringLayout.NORTH, frame);
 		
+		accountsCounterLabel = new JLabel("Accounts: ");
+		layout.putConstraint(SpringLayout.WEST, accountsCounterLabel, 10, SpringLayout.WEST, frame);
+		layout.putConstraint(SpringLayout.NORTH, accountsCounterLabel, 540, SpringLayout.NORTH, frame);
+		
+		transactionCounterLabel = new JLabel("Transaktionen: ");
+		layout.putConstraint(SpringLayout.WEST, transactionCounterLabel, 310, SpringLayout.WEST, frame);
+		layout.putConstraint(SpringLayout.NORTH, transactionCounterLabel, 540, SpringLayout.NORTH, frame);
+		
 		//Menu Bar, Menus und Items
 		menuBar = new JMenuBar();
 		//General Menu
@@ -329,6 +339,8 @@ public class Swing_View
 		frame.add(addTransactionButton);
 		frame.add(totalBalanceLabel);
 		frame.add(totalTimeToTargetDateLabel);
+		frame.add(accountsCounterLabel);
+		frame.add(transactionCounterLabel);
 		frame.add(menuBar);
 		
 		//Events
@@ -576,29 +588,149 @@ public class Swing_View
 				
 				if(oldTimeUnitSelection != timeUnitSelectorBox.getSelectedIndex())
 				{
+					int tempTimeUnit = 0;
 					switch (oldTimeUnitSelection) 
 					{
 						case 0: //Days
-							timeInputField.setText("1");
+							switch(timeUnitSelectorBox.getSelectedIndex())
+							{
+								case 1:
+									tempTimeUnit = calc.CalculateWeeksFromDays(Integer.parseInt(timeInputField.getText()));
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 2:
+									tempTimeUnit = calc.CalculateMonthsFromDays(Integer.parseInt(timeInputField.getText()));
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 3:
+									tempTimeUnit = calc.CalculateQuartersFromDays(Integer.parseInt(timeInputField.getText()));
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 4:
+									tempTimeUnit = calc.CalculateYearsFromDays(Integer.parseInt(timeInputField.getText()));
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								default:
+									timeInputField.setText("1");
+									break;
+							}
 							break;
 						case 1: //Weeks
-							if(timeUnitSelectorBox.getSelectedIndex() == 0)
+							switch(timeUnitSelectorBox.getSelectedIndex())
 							{
-								timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 7 + "");
-							}
-							else 
-							{
-								timeInputField.setText("1");
+								case 0:
+									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 7 + "");
+									break;
+								case 2:
+									tempTimeUnit = Integer.parseInt(timeInputField.getText()) * 7;
+									tempTimeUnit = calc.CalculateMonthsFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 3:
+									tempTimeUnit = Integer.parseInt(timeInputField.getText()) * 7;
+									tempTimeUnit = calc.CalculateQuartersFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 4:
+									tempTimeUnit = Integer.parseInt(timeInputField.getText()) * 7;
+									tempTimeUnit = calc.CalculateYearsFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								default:
+									timeInputField.setText("1");
+									break;
 							}
 							break;
 						case 2: //Months
-							switch (timeUnitSelectorBox.getSelectedIndex()) 
+							switch(timeUnitSelectorBox.getSelectedIndex())
 							{
 								case 0:
 									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 31 + "");
 									break;
 								case 1:
-									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 4 + "");
+									tempTimeUnit = Integer.parseInt(timeInputField.getText()) * 31;
+									tempTimeUnit = calc.CalculateWeeksFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 3:
+									tempTimeUnit = Integer.parseInt(timeInputField.getText()) * 31;
+									tempTimeUnit = calc.CalculateQuartersFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 4:
+									tempTimeUnit = Integer.parseInt(timeInputField.getText()) * 31;
+									tempTimeUnit = calc.CalculateYearsFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
 									break;
 								default:
 									timeInputField.setText("1");
@@ -606,16 +738,46 @@ public class Swing_View
 							}
 							break;
 						case 3: //Quarters
-							switch (timeUnitSelectorBox.getSelectedIndex()) 
+							switch(timeUnitSelectorBox.getSelectedIndex())
 							{
 								case 0:
 									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 3) * 31 + "");
 									break;
 								case 1:
-									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 3) * 4 + "");
+									tempTimeUnit = (Integer.parseInt(timeInputField.getText()) * 3) * 31;
+									tempTimeUnit = calc.CalculateWeeksFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
 									break;
 								case 2:
-									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 3 + "");
+									tempTimeUnit = (Integer.parseInt(timeInputField.getText()) * 3) * 31;
+									tempTimeUnit = calc.CalculateMonthsFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
+									break;
+								case 4:
+									tempTimeUnit = (Integer.parseInt(timeInputField.getText()) * 3) * 31;
+									tempTimeUnit = calc.CalculateYearsFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
 									break;
 								default:
 									timeInputField.setText("1");
@@ -623,26 +785,52 @@ public class Swing_View
 							}
 							break;
 						case 4: //Years
-							switch (timeUnitSelectorBox.getSelectedIndex()) 
+							switch(timeUnitSelectorBox.getSelectedIndex())
 							{
 								case 0:
 									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 365) + "");
 									break;
 								case 1:
-									timeInputField.setText((Integer.parseInt(timeInputField.getText()) * 52) + "");
+									tempTimeUnit = (Integer.parseInt(timeInputField.getText()) * 52) * 7;
+									tempTimeUnit = calc.CalculateWeeksFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
 									break;
 								case 2:
-									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 12 + "");
+									tempTimeUnit = ((Integer.parseInt(timeInputField.getText()) * 12) * 4) * 7;
+									tempTimeUnit = calc.CalculateMonthsFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
 									break;
 								case 3:
-									timeInputField.setText(Integer.parseInt(timeInputField.getText()) * 4 + "");
+									tempTimeUnit = (Integer.parseInt(timeInputField.getText()) * 3) * 31;
+									tempTimeUnit = calc.CalculateQuartersFromDays(tempTimeUnit);
+									if(tempTimeUnit > 0)
+									{
+										timeInputField.setText(tempTimeUnit + "");
+									}
+									else 
+									{
+										timeInputField.setText("1");
+									}
 									break;
 								default:
 									timeInputField.setText("1");
 									break;
 							}
 							break;
-	
 						default:
 							break;
 					}
@@ -673,6 +861,7 @@ public class Swing_View
 			tableModel.addRow(currentTransaction.split(";"));
 		}
 		transactionTable.setModel(tableModel);
+		transactionCounterLabel.setText("Transaktionen: " + transactions.size());
 	}
 	
 	private void UpdateBalanceText()
@@ -784,6 +973,7 @@ public class Swing_View
 		{
 			exportAccountListItem.setEnabled(false);
 		}
+		accountsCounterLabel.setText("Accounts: " + dh.GetAccountCount());
 	}
 	
 	private void UpdateCalculatorBoxForecast()

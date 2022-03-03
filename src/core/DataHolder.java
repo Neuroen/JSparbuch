@@ -23,6 +23,11 @@ public class DataHolder
 		return accountsList;
 	}
 	
+	public int GetAccountCount()
+	{
+		return accountsList.size();
+	}
+	
 	public String GetAccountDataFromName(String account)
 	{
 		for(int i = 0; i < accountsList.size(); i++)
