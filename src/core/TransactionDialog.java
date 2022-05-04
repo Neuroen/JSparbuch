@@ -1,6 +1,5 @@
 package core;
 
-import java.security.KeyStore.PrivateKeyEntry;
 import java.util.Properties;
 
 import javax.swing.JComponent;
@@ -44,7 +43,7 @@ public class TransactionDialog
 	public void SetTransactionDate(String date)
 	{
 		datePicker.getModel().setDay(Integer.valueOf(date.split("\\.")[0]));
-		datePicker.getModel().setMonth(Integer.valueOf(date.split("\\.")[1]));
+		datePicker.getModel().setMonth(Integer.valueOf(date.split("\\.")[1]) -1);
 		datePicker.getModel().setYear(Integer.valueOf(date.split("\\.")[2]));
 		datePicker.getModel().setSelected(true);
 	}
@@ -67,7 +66,7 @@ public class TransactionDialog
 			String money = moneyField.getText();
 			if(money.length() <= 0)
 			{
-				JOptionPane.showConfirmDialog(null, null, "Keine Summe eingefügt", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showConfirmDialog(null, null, "Keine Summe eingef��gt", JOptionPane.ERROR_MESSAGE);
 				return null;
 			}
 			String description = descriptionField.getText();

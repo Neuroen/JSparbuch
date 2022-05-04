@@ -292,7 +292,7 @@ public class Swing_View
 		menuBar = new JMenuBar();
 		//General Menu
 		generalMenu = new JMenu("Allgemein");
-		aboutItem = new JMenuItem("Über Sparbuch");
+		aboutItem = new JMenuItem("über Sparbuch");
 		settingsItem = new JMenuItem("Einstellungen");
 		exItem = new JMenuItem("Beenden");
 		
@@ -512,6 +512,7 @@ public class Swing_View
 				td.SetTransactionDate(transactionData.split(";")[1]);
 				td.SetDescriptionField(transactionData.split(";")[2]);
 				td.SetMoneyField(transactionData.split(";")[3]);
+				System.out.println(transactionData.split(";")[1]);
 				String oldTransactionData = transactionData;
 				transactionData = td.OpenTransactionDialog();
 				if(transactionData == null)
