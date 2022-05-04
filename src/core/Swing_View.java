@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -139,6 +140,7 @@ public class Swing_View
 		frame.setBounds(100, 100, 1000, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
+		frame.setIconImage(new ImageIcon(this.getClass().getResource("dollar-icon.png")).getImage());
 		
 		layout = new SpringLayout(); 
 		
@@ -292,7 +294,7 @@ public class Swing_View
 		menuBar = new JMenuBar();
 		//General Menu
 		generalMenu = new JMenu("Allgemein");
-		aboutItem = new JMenuItem("über Sparbuch");
+		aboutItem = new JMenuItem("Über Sparbuch");
 		settingsItem = new JMenuItem("Einstellungen");
 		exItem = new JMenuItem("Beenden");
 		
@@ -328,7 +330,7 @@ public class Swing_View
 		editTransactionItem.setEnabled(false);
 		deleteTransactionItem.setEnabled(false);
 		
-		//menuBar.add(generalMenu); Einbauen wenn Fertig
+		menuBar.add(generalMenu); //Einbauen wenn Fertig
 		menuBar.add(accountMenu);
 		menuBar.add(transactionMenu);
 		
@@ -537,6 +539,25 @@ public class Swing_View
 				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
 				UpdateTransactionTable(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
 				UpdateBalanceText();
+			}
+		});
+		
+		//GeneralMenu Events
+		
+		aboutItem.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				AboutWindow about = new AboutWindow();
+				about.StartGui();
+			}
+		});
+		
+		settingsItem.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				
 			}
 		});
 		
