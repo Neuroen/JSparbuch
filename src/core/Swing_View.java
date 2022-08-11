@@ -910,7 +910,7 @@ public class Swing_View
 		{
 			targetCalculateBox.setEnabledAt(0, false);
 			targetCalculateBox.setSelectedIndex(1);
-			totalBalanceLabel.setText("<html><body>" + balance + Static_Settings.GetCurrency() + "<br><br>Kein Ziel Gesetzt</body></html>");
+			totalBalanceLabel.setText("<html><body>" + String.format("%.02f", balance) + Static_Settings.GetCurrency() + "<br><br>Kein Ziel Gesetzt</body></html>");
 		}
 		else 
 		{
