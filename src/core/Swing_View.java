@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.DefaultListModel;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,6 +22,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -432,13 +434,22 @@ public class Swing_View
 				{
 					return;
 				}
-				dh.DeleteAccount(accountList.getSelectedValue().toString());
-				fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
-				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
-				editAccountItem.setEnabled(false);
-				deleteAccountItem.setEnabled(false);
-				UpdateAccountsList();
-				UpdateBalanceText();
+				int result = JOptionPane.showConfirmDialog(null, "Wollen Sie das Konto wirklich löschen?\nDies kann nicht rückgängig gemacht werden!", "Konto Löschung", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				if(result == 0)
+				{
+					dh.DeleteAccount(accountList.getSelectedValue().toString());
+					fm.WriteFile(fm.GetUserFile(), dh.GetAccountDataAsStringFormattet());
+					fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
+					editAccountItem.setEnabled(false);
+					deleteAccountItem.setEnabled(false);
+					UpdateAccountsList();
+					UpdateBalanceText();
+					JOptionPane.showConfirmDialog(null, "Das Konto wurde gelöscht", "Konto Löschung", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+				}
+				else 
+				{
+					JOptionPane.showConfirmDialog(null, "Das Konto wurde nicht gelöscht", "Konto Löschung", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+				}
 			}
 		});
 		
@@ -534,11 +545,19 @@ public class Swing_View
 			public void actionPerformed(ActionEvent e) 
 			{
 				int tableID = transactionTable.getSelectedRow();
-				//TODO Warnungs Message ausgeben.
-				dh.DeleteTransactionFromIdentifier(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()).get(tableID - 1));
-				fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
-				UpdateTransactionTable(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
-				UpdateBalanceText();
+				int result = JOptionPane.showConfirmDialog(null, "Wollen Sie diese Transaktion wirklich löschen?\nDies kann nicht rückgängig gemacht werden!", "Transaktions Löschung", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				if(result == 0)
+				{
+					dh.DeleteTransactionFromIdentifier(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()).get(tableID - 1));
+					fm.WriteFile(fm.GetDataFile(), dh.GetTransactionDataAsStringFormattet());
+					UpdateTransactionTable(dh.GetTransactionsForAccount(accountList.getSelectedValue().toString()));
+					UpdateBalanceText();
+					JOptionPane.showConfirmDialog(null, "Die Transaktion wurde gelöscht", "Transaktions Löschung", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+				}
+				else 
+				{
+					JOptionPane.showConfirmDialog(null, "Die Transaktion wurde nicht gelöscht", "Transaktions Löschung", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+				}
 			}
 		});
 		
